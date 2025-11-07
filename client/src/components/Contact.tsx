@@ -29,7 +29,7 @@ export default function Contact() {
         <div className="grid md:grid-cols-2 gap-12">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold mb-4" data-testid="text-about-title">
-              About AI DevOps Assistant
+              About AutoPatcher
             </h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
               <p data-testid="text-about-p1">
@@ -39,7 +39,7 @@ export default function Contact() {
                 Founded by experienced DevOps engineers and AI researchers, we understand the pain points of modern cloud-native development. Our tools are designed to reduce cognitive load and prevent costly deployment errors.
               </p>
               <p data-testid="text-about-p3">
-                Join over 1,000+ development teams who trust AI DevOps Assistant to streamline their workflows and ship faster.
+                Join over 1,000+ development teams who trust AutoPatcher to streamline their workflows and ship faster.
               </p>
             </div>
             <div className="mt-8 flex flex-wrap gap-8">

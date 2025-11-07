@@ -21,7 +21,7 @@ export default function Navigation() {
             <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
               <i className="fas fa-robot text-primary-foreground text-lg"></i>
             </div>
-            <span className="text-xl font-semibold">AI DevOps Assistant</span>
+            <span className="text-xl font-semibold">AutoPatcher</span>
           </div>
 
           <div className="hidden md:flex items-center gap-6">

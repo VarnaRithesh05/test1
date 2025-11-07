@@ -78,7 +78,7 @@ export default function Footer() {
               <i className="fas fa-robot text-primary-foreground text-sm"></i>
             </div>
             <span className="text-sm text-muted-foreground" data-testid="text-footer-copyright">
-              © 2025 AI DevOps Assistant. All rights reserved.
+              © 2025 AutoPatcher. All rights reserved.
             </span>
           </div>
 
