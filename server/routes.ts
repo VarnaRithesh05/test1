@@ -17,7 +17,17 @@ async function analyzeYAMLContent(fileContent: string, genAI: GoogleGenerativeAI
     model: "gemini-2.5-flash"
   });
   
-  const prompt = `You are an expert DevOps engineer. The following is a YAML file. Analyze it for errors, misconfigurations, and bad practices. Respond ONLY with a single JSON object with three keys: 1. corrected_yaml (the full corrected YAML file), 2. explanation (a detailed, step-by-step explanation of what was wrong and why you fixed it), and 3. is_correct (a boolean - true if the original YAML was already correct, false if issues were found).
+  const prompt = `You are an expert DevOps engineer. The following is a YAML file. Analyze it for errors, misconfigurations, and bad practices. 
+
+IMPORTANT: In the corrected_yaml, add inline comments using # to highlight ALL changes you made. For each correction:
+- Add a comment on the same line or immediately above showing what was changed
+- Use format like "# FIXED: [brief description]" or "# CHANGED: [old value] → [new value]" or "# ADDED: [reason]"
+- Be concise but clear about what was corrected
+
+Respond ONLY with a single JSON object with three keys:
+1. corrected_yaml (the full corrected YAML file with inline comments marking ALL changes)
+2. explanation (a detailed, step-by-step explanation of what was wrong and why you fixed it)
+3. is_correct (a boolean - true if the original YAML was already correct, false if issues were found)
 
 YAML file to analyze:
 ${fileContent}`;
