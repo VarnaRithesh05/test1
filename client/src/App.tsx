@@ -8,6 +8,7 @@ import AnalyzeYML from "@/pages/AnalyzeYML";
 import GenerateYML from "@/pages/GenerateYML";
 import ExplainCode from "@/pages/ExplainCode";
 import MonitorWebhooks from "@/pages/MonitorWebhooks";
+import Signup from "@/pages/Signup";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -18,6 +19,7 @@ function Router() {
       <Route path="/generate" component={GenerateYML}/>
       <Route path="/explain" component={ExplainCode}/>
       <Route path="/monitor" component={MonitorWebhooks}/>
+      <Route path="/signup" component={Signup}/>
       <Route component={NotFound} />
     </Switch>
   );
