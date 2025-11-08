@@ -2,7 +2,7 @@ import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import multer from "multer";
-import OpenAI from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -11,8 +11,7 @@ interface MulterRequest extends Request {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Using OpenAI blueprint - the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
   
   app.post("/api/analyze-yml", upload.single('file'), async (req: MulterRequest, res) => {
     try {
@@ -22,47 +21,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const fileContent = req.file.buffer.toString('utf-8');
       
-      const prompt = `You are an expert DevOps engineer. The following is a YAML file. Analyze it for errors, misconfigurations, and bad practices. Respond with a JSON object with three keys: 1. corrected_yaml (the full corrected YAML file), 2. explanation (a detailed, step-by-step explanation of what was wrong and why you fixed it), and 3. is_correct (a boolean - true if the original YAML was already correct, false if issues were found).
+      const model = genAI.getGenerativeModel({ 
+        model: "gemini-1.5-flash-latest"
+      });
+      
+      const prompt = `You are an expert DevOps engineer. The following is a YAML file. Analyze it for errors, misconfigurations, and bad practices. Respond ONLY with a single JSON object with three keys: 1. corrected_yaml (the full corrected YAML file), 2. explanation (a detailed, step-by-step explanation of what was wrong and why you fixed it), and 3. is_correct (a boolean - true if the original YAML was already correct, false if issues were found).
 
 YAML file to analyze:
 ${fileContent}`;
 
-      // Using gpt-5 model with JSON response format
-      const completion = await openai.chat.completions.create({
-        model: "gpt-5",
-        messages: [
-          {
-            role: "system",
-            content: "You are an expert DevOps engineer who analyzes YAML files. Always respond with valid JSON."
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        response_format: { type: "json_object" },
-        max_completion_tokens: 2048,
-      });
+      const result = await model.generateContent(prompt);
+      const response = result.response;
+      const text = response.text();
       
-      const responseText = completion.choices[0].message.content || "{}";
-      console.log("OpenAI response:", responseText);
+      console.log("Gemini response:", text);
       
-      const parsedResponse = JSON.parse(responseText);
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error("Failed to parse AI response");
+      }
+      
+      const parsedResponse = JSON.parse(jsonMatch[0]);
       
       res.json(parsedResponse);
     } catch (error: any) {
       console.error("Error analyzing YAML:", error);
       
       // Provide more specific error messages
-      if (error?.status === 429) {
+      if (error?.status === 429 || error?.message?.includes("quota")) {
         return res.status(429).json({ 
-          error: "API quota exceeded. Please check your OpenAI API key has sufficient credits." 
+          error: "API quota exceeded. Please check your Gemini API key has sufficient credits." 
         });
       }
       
-      if (error?.status === 401) {
+      if (error?.status === 401 || error?.message?.includes("API key")) {
         return res.status(401).json({ 
-          error: "Invalid API key. Please check your OPENAI_API_KEY configuration." 
+          error: "Invalid API key. Please check your GEMINI_API_KEY configuration." 
         });
       }
       
