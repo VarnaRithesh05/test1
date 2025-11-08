@@ -298,7 +298,7 @@ User request: ${prompt}`;
       const allKeys = await db.list("webhook:");
       const events: any[] = [];
       
-      // allKeys is an array of strings
+      // Get all webhook event values
       if (Array.isArray(allKeys)) {
         for (const key of allKeys) {
           const event = await db.get(key);
@@ -315,6 +315,7 @@ User request: ${prompt}`;
         return dateB - dateA;
       });
       
+      // Return the array of events as JSON
       res.json(events);
     } catch (error: any) {
       console.error("Error fetching webhook events:", error);
