@@ -5,6 +5,8 @@ import multer from "multer";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import crypto from "crypto";
 import Database from "@replit/database";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -522,6 +524,135 @@ ${code}`;
       console.error("Error fetching webhook events:", error);
       res.status(500).json({ 
         error: "Failed to fetch webhook events" 
+      });
+    }
+  });
+
+  // Authentication Routes
+  app.post("/api/auth/signup", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      // Validate input
+      if (!email || !password) {
+        return res.status(400).json({ error: "Email and password are required" });
+      }
+      
+      if (typeof email !== 'string' || typeof password !== 'string') {
+        return res.status(400).json({ error: "Invalid email or password format" });
+      }
+      
+      // Basic email validation
+      if (!email.includes('@')) {
+        return res.status(400).json({ error: "Invalid email format" });
+      }
+      
+      // Check if user already exists
+      const userKey = `user:${email}`;
+      const existingUserResponse = await db.get(userKey);
+      const existingUser = (existingUserResponse as any)?.value || existingUserResponse;
+      
+      // Check if the response indicates user doesn't exist (404 error)
+      if (existingUser && existingUser.ok !== false) {
+        return res.status(409).json({ error: "User with this email already exists" });
+      }
+      
+      // Hash the password
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+      
+      // Create user object
+      const user = {
+        email,
+        password: hashedPassword,
+        createdAt: new Date().toISOString()
+      };
+      
+      // Save user to database
+      await db.set(userKey, user);
+      console.log(`New user created: ${email}`);
+      
+      // Create JWT token
+      const jwtSecret = process.env.JWT_SECRET;
+      if (!jwtSecret) {
+        console.error("JWT_SECRET is not configured");
+        return res.status(500).json({ error: "Server configuration error" });
+      }
+      
+      const token = jwt.sign(
+        { email },
+        jwtSecret,
+        { expiresIn: '7d' }
+      );
+      
+      // Send response with token
+      res.status(201).json({ 
+        message: "User created successfully",
+        token,
+        user: { email }
+      });
+    } catch (error: any) {
+      console.error("Error during signup:", error);
+      res.status(500).json({ 
+        error: "Failed to create user. Please try again." 
+      });
+    }
+  });
+
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      // Validate input
+      if (!email || !password) {
+        return res.status(400).json({ error: "Email and password are required" });
+      }
+      
+      if (typeof email !== 'string' || typeof password !== 'string') {
+        return res.status(400).json({ error: "Invalid email or password format" });
+      }
+      
+      // Find user in database
+      const userKey = `user:${email}`;
+      const userResponse = await db.get(userKey);
+      const user = (userResponse as any)?.value || userResponse;
+      
+      if (!user || !user.password) {
+        return res.status(401).json({ error: "Invalid email or password" });
+      }
+      
+      // Compare password with stored hash
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      
+      if (!isPasswordValid) {
+        return res.status(401).json({ error: "Invalid email or password" });
+      }
+      
+      // Create JWT token
+      const jwtSecret = process.env.JWT_SECRET;
+      if (!jwtSecret) {
+        console.error("JWT_SECRET is not configured");
+        return res.status(500).json({ error: "Server configuration error" });
+      }
+      
+      const token = jwt.sign(
+        { email: user.email },
+        jwtSecret,
+        { expiresIn: '7d' }
+      );
+      
+      console.log(`User logged in: ${email}`);
+      
+      // Send response with token
+      res.json({ 
+        message: "Login successful",
+        token,
+        user: { email: user.email }
+      });
+    } catch (error: any) {
+      console.error("Error during login:", error);
+      res.status(500).json({ 
+        error: "Failed to login. Please try again." 
       });
     }
   });
