@@ -11,6 +11,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { YAMLComparison } from "@/components/YAMLComparison";
 
 export default function MonitorWebhooks() {
   const { data: events, isLoading } = useQuery<WebhookEvent[]>({
@@ -126,7 +127,16 @@ export default function MonitorWebhooks() {
                                     {fileResult.error}
                                   </p>
                                 ) : fileResult.analysis && (
-                                  <div className="space-y-2">
+                                  <div className="space-y-4">
+                                    {!fileResult.analysis.is_correct && fileResult.originalContent && (
+                                      <div data-testid={`yaml-comparison-${event.id}-${index}`}>
+                                        <YAMLComparison 
+                                          originalYAML={fileResult.originalContent}
+                                          correctedYAML={fileResult.analysis.corrected_yaml || ""}
+                                          showTitle={false}
+                                        />
+                                      </div>
+                                    )}
                                     {!fileResult.analysis.is_correct && (
                                       <div className="text-sm" data-testid={`text-explanation-${event.id}-${index}`}>
                                         <p className="font-medium mb-1">Analysis:</p>

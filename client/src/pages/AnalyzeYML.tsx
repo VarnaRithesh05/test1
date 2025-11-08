@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Upload, CheckCircle, XCircle } from "lucide-react";
 import Navigation from "@/components/Navigation";
+import { YAMLComparison } from "@/components/YAMLComparison";
 
 export default function AnalyzeYML() {
   const [file, setFile] = useState<File | null>(null);
@@ -166,30 +167,12 @@ export default function AnalyzeYML() {
         )}
 
         {originalCode && (
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Original Code</CardTitle>
-                <CardDescription>Your uploaded YAML file</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <pre className="bg-muted p-4 rounded-md overflow-auto max-h-96 text-sm font-mono" data-testid="text-original-code">
-                  {originalCode}
-                </pre>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Corrected Code</CardTitle>
-                <CardDescription>AI-optimized version</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <pre className="bg-muted p-4 rounded-md overflow-auto max-h-96 text-sm font-mono" data-testid="text-corrected-code">
-                  {correctedCode}
-                </pre>
-              </CardContent>
-            </Card>
+          <div className="mb-8">
+            <YAMLComparison 
+              originalYAML={originalCode}
+              correctedYAML={correctedCode}
+              showTitle={true}
+            />
           </div>
         )}
 

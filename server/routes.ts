@@ -420,6 +420,7 @@ ${code}`;
           
           results.push({
             file: filePath,
+            originalContent: fileContent,
             analysis
           });
           
