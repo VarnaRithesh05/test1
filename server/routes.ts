@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import multer from "multer";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import crypto from "crypto";
+import Database from "@replit/database";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -37,6 +38,7 @@ ${fileContent}`;
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+  const db = new Database();
   
   app.post("/api/analyze-yml", upload.single('file'), async (req: MulterRequest, res) => {
     try {
@@ -237,14 +239,20 @@ User request: ${prompt}`;
         }
       }
       
-      // Save webhook event to storage
+      // Save webhook event to Replit Database
       try {
-        await storage.createWebhookEvent({
-          repository: repository.full_name,
-          eventType: event,
-          filesAnalyzed: results,
+        const webhookEvent = {
+          id: crypto.randomUUID(),
+          timestamp: new Date().toISOString(),
           status: results.every(r => !r.error) ? 'success' : 'partial',
-        });
+          eventType: event,
+          repository: repository.full_name,
+          filesAnalyzed: results
+        };
+        
+        const eventKey = `webhook:${webhookEvent.id}`;
+        await db.set(eventKey, webhookEvent);
+        console.log(`Saved webhook event to Replit DB: ${eventKey}`);
       } catch (storageError) {
         console.error("Error saving webhook event:", storageError);
       }
@@ -257,16 +265,22 @@ User request: ${prompt}`;
     } catch (error: any) {
       console.error("Error processing webhook:", error);
       
-      // Try to save error event
+      // Try to save error event to Replit Database
       try {
         const payload = req.body;
         if (payload?.repository?.full_name) {
-          await storage.createWebhookEvent({
-            repository: payload.repository.full_name,
-            eventType: req.headers['x-github-event'] as string || 'unknown',
-            filesAnalyzed: [],
+          const webhookEvent = {
+            id: crypto.randomUUID(),
+            timestamp: new Date().toISOString(),
             status: 'error',
-          });
+            eventType: req.headers['x-github-event'] as string || 'unknown',
+            repository: payload.repository.full_name,
+            filesAnalyzed: []
+          };
+          
+          const eventKey = `webhook:${webhookEvent.id}`;
+          await db.set(eventKey, webhookEvent);
+          console.log(`Saved error webhook event to Replit DB: ${eventKey}`);
         }
       } catch (storageError) {
         console.error("Error saving error webhook event:", storageError);
@@ -280,7 +294,27 @@ User request: ${prompt}`;
 
   app.get("/api/webhook-events", async (_req, res) => {
     try {
-      const events = await storage.getWebhookEvents(100);
+      // Fetch all webhook events from Replit Database
+      const allKeys = await db.list("webhook:");
+      const events: any[] = [];
+      
+      // allKeys is an array of strings
+      if (Array.isArray(allKeys)) {
+        for (const key of allKeys) {
+          const event = await db.get(key);
+          if (event) {
+            events.push(event);
+          }
+        }
+      }
+      
+      // Sort by timestamp (newest first)
+      events.sort((a: any, b: any) => {
+        const dateA = new Date(a.timestamp).getTime();
+        const dateB = new Date(b.timestamp).getTime();
+        return dateB - dateA;
+      });
+      
       res.json(events);
     } catch (error: any) {
       console.error("Error fetching webhook events:", error);
