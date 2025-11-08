@@ -7,6 +7,7 @@ AutoPatcher is an AI-powered DevOps productivity tool designed to streamline Doc
 The platform leverages Google's Gemini AI to:
 1. **Analyze YAML files** (Docker Compose, GitHub Actions) for errors, misconfigurations, and best practice violations, providing side-by-side comparisons of problematic code and AI-generated corrections with detailed explanations
 2. **Generate production-ready YAML files** from natural language descriptions (e.g., "I need a Dockerfile for a Node.js app with Express")
+3. **Analyze Pull Request changes** - When a pull request is opened or updated, fetches the diff and provides a 3-bullet summary plus file-by-file analysis with bug/improvement identification
 
 ## User Preferences
 
@@ -49,13 +50,15 @@ Preferred communication style: Simple, everyday language.
 - AI-powered endpoints:
   - `POST /api/analyze-yml`: Analyzes uploaded YAML files for errors and best practices
   - `POST /api/generate-yml`: Generates YAML files from natural language prompts
-  - `POST /api/github-webhook`: GitHub webhook endpoint for automated YAML checking on push events
+  - `POST /api/github-webhook`: GitHub webhook endpoint for automated analysis on both push and pull_request events
     - Verifies webhook signatures using HMAC-SHA256 with raw request body
-    - Extracts YAML files from commit payloads
-    - Fetches file content from GitHub API
+    - **Push events**: Extracts YAML files from commit payloads, fetches file content from GitHub API, analyzes for errors
+    - **Pull request events**: Fetches diff from diff_url, provides AI-powered code review with 3-bullet summary and file-by-file analysis
     - Reuses AI analysis logic for consistency
     - Requires `GITHUB_WEBHOOK_SECRET` environment variable for signature verification
     - Optionally uses `GITHUB_TOKEN` for private repository access
+    - Saves all events (success and failure) to Replit Database
+  - `GET /api/webhook-events`: Retrieves all webhook events from Replit Database, sorted by timestamp
 
 **Development vs. Production:**
 - Development: Vite dev server integrated as Express middleware with HMR support
@@ -112,19 +115,25 @@ Preferred communication style: Simple, everyday language.
   - Reusable analysis function `analyzeYAMLContent` for consistency across endpoints
 
 **GitHub Integration:**
-- **Webhook Support** for automated YAML checking on push events
+- **Webhook Support** for automated analysis on push and pull request events
   - Secure signature verification using HMAC-SHA256
   - Raw body parsing to match GitHub's signing algorithm
-  - Extracts YAML files (.yml, .yaml) from commit changes
+  - **Push events**: Extracts and analyzes YAML files (.yml, .yaml) from commit changes
+  - **Pull request events**: Processes 'opened' and 'synchronize' actions, fetches diff from diff_url, and provides AI-powered code review with 3-bullet summary and file-by-file change analysis
   - Fetches file content via GitHub Contents API
   - Optional authentication with `GITHUB_TOKEN` for private repositories
-  - Returns comprehensive analysis results for each modified YAML file
+  - Saves all webhook events (push and pull_request) to Replit Database with analysis results
 
 **Database Service:**
-- **Neon Serverless PostgreSQL**
-  - Connection string via `DATABASE_URL` environment variable
-  - Automatic connection management (no manual pooling required)
-  - WebSocket-based protocol for edge compatibility
+- **Replit Database** (`@replit/database` v3.0.1)
+  - Key-value store for webhook events
+  - Uses `webhook:{UUID}` key format for event storage
+  - Stores webhook metadata (repository, event type, timestamp, status) and analysis results
+  - No configuration required - works out of the box in Replit environment
+  - 50 MiB storage limit, 5,000 keys per store
+- **PostgreSQL** (previously used, now replaced by Replit DB for webhook storage)
+  - Neon Serverless PostgreSQL via `DATABASE_URL` environment variable
+  - Schema still exists for potential future use
 
 **UI Component Libraries:**
 - **Radix UI** primitives for 20+ accessible component types (dialogs, dropdowns, tooltips, etc.)

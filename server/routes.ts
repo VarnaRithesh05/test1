@@ -36,6 +36,25 @@ ${fileContent}`;
   return JSON.parse(jsonMatch[0]);
 }
 
+async function analyzeDiff(diffText: string, genAI: GoogleGenerativeAI) {
+  const model = genAI.getGenerativeModel({ 
+    model: "gemini-2.5-flash"
+  });
+  
+  const prompt = `You are a senior software engineer. The following is a 'diff' file from a GitHub pull request. In plain English, provide a 3-bullet-point summary of what this pull request does. After the summary, explain the changes in each file, one by one, and identify any potential bugs or improvements.
+
+Diff:
+${diffText}`;
+
+  const result = await model.generateContent(prompt);
+  const response = result.response;
+  const analysis = response.text();
+  
+  console.log("Diff analysis:", analysis);
+  
+  return analysis;
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
   const db = new Database();
@@ -155,12 +174,132 @@ User request: ${prompt}`;
         console.log('Webhook signature verified successfully');
       }
       
-      // Only handle push events
-      if (event !== 'push') {
+      // Handle both push and pull_request events
+      if (event !== 'push' && event !== 'pull_request') {
         return res.status(200).json({ message: "Event type not supported" });
       }
       
       const payload = req.body;
+      
+      // Handle pull_request events
+      if (event === 'pull_request') {
+        const { action, pull_request, repository } = payload;
+        
+        // Only handle opened and synchronize actions
+        if (action !== 'opened' && action !== 'synchronize') {
+          return res.status(200).json({ 
+            message: `Pull request action '${action}' not processed` 
+          });
+        }
+        
+        console.log(`Processing pull request #${pull_request.number}: ${pull_request.title}`);
+        
+        try {
+          // Fetch the diff from the diff_url
+          const diffUrl = pull_request.diff_url;
+          const headers: Record<string, string> = {
+            'User-Agent': 'AutoPatcher-Webhook'
+          };
+          
+          // Add GitHub token if available
+          const githubToken = process.env.GITHUB_TOKEN;
+          if (githubToken) {
+            headers['Authorization'] = `token ${githubToken}`;
+          }
+          
+          const diffResponse = await fetch(diffUrl, { headers });
+          
+          if (!diffResponse.ok) {
+            console.error(`Failed to fetch diff: ${diffResponse.statusText}`);
+            
+            // Save error event before returning
+            const webhookEvent = {
+              id: crypto.randomUUID(),
+              timestamp: new Date().toISOString(),
+              status: 'error',
+              eventType: 'pull_request',
+              repository: repository.full_name,
+              pullRequest: {
+                number: pull_request.number,
+                title: pull_request.title,
+                action: action
+              },
+              error: `Failed to fetch diff: ${diffResponse.statusText}`
+            };
+            
+            const eventKey = `webhook:${webhookEvent.id}`;
+            await db.set(eventKey, webhookEvent);
+            console.log(`Saved error webhook event to Replit DB: ${eventKey}`);
+            
+            return res.status(500).json({ 
+              error: `Failed to fetch diff: ${diffResponse.statusText}` 
+            });
+          }
+          
+          const diffText = await diffResponse.text();
+          console.log(`Fetched diff (${diffText.length} characters)`);
+          
+          // Analyze the diff with AI
+          const analysis = await analyzeDiff(diffText, genAI);
+          
+          // Save pull request analysis to Replit Database
+          const webhookEvent = {
+            id: crypto.randomUUID(),
+            timestamp: new Date().toISOString(),
+            status: 'success',
+            eventType: 'pull_request',
+            repository: repository.full_name,
+            pullRequest: {
+              number: pull_request.number,
+              title: pull_request.title,
+              action: action,
+              url: pull_request.html_url
+            },
+            analysis: analysis
+          };
+          
+          const eventKey = `webhook:${webhookEvent.id}`;
+          await db.set(eventKey, webhookEvent);
+          console.log(`Saved pull request analysis to Replit DB: ${eventKey}`);
+          
+          return res.status(200).json({
+            message: `Analyzed pull request #${pull_request.number}`,
+            repository: repository.full_name,
+            pull_request: pull_request.number,
+            analysis: analysis
+          });
+        } catch (error: any) {
+          console.error("Error analyzing pull request:", error);
+          
+          // Save error event
+          try {
+            const webhookEvent = {
+              id: crypto.randomUUID(),
+              timestamp: new Date().toISOString(),
+              status: 'error',
+              eventType: 'pull_request',
+              repository: repository.full_name,
+              pullRequest: {
+                number: pull_request.number,
+                title: pull_request.title,
+                action: action
+              },
+              error: error.message || 'Analysis failed'
+            };
+            
+            const eventKey = `webhook:${webhookEvent.id}`;
+            await db.set(eventKey, webhookEvent);
+          } catch (storageError) {
+            console.error("Error saving error event:", storageError);
+          }
+          
+          return res.status(500).json({ 
+            error: "Failed to analyze pull request" 
+          });
+        }
+      }
+      
+      // Handle push events
       const { commits, repository } = payload;
       
       if (!commits || !Array.isArray(commits)) {
@@ -267,7 +406,6 @@ User request: ${prompt}`;
       
       // Try to save error event to Replit Database
       try {
-        const payload = req.body;
         if (payload?.repository?.full_name) {
           const webhookEvent = {
             id: crypto.randomUUID(),
