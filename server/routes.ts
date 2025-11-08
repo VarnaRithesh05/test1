@@ -278,6 +278,18 @@ User request: ${prompt}`;
     }
   });
 
+  app.get("/api/webhook-events", async (_req, res) => {
+    try {
+      const events = await storage.getWebhookEvents(100);
+      res.json(events);
+    } catch (error: any) {
+      console.error("Error fetching webhook events:", error);
+      res.status(500).json({ 
+        error: "Failed to fetch webhook events" 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
