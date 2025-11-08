@@ -70,11 +70,19 @@ export default function AnalyzeYML() {
         title: "Analysis complete",
         description: data.is_correct ? "Your YAML file is correct!" : "Issues found and corrected",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Analysis error:', error);
+      
+      let errorMessage = "Failed to analyze YAML file. Please try again.";
+      
+      // Try to get error message from response
+      if (error?.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
-        title: "Error",
-        description: "Failed to analyze YAML file. Please try again.",
+        title: "Analysis Error",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
