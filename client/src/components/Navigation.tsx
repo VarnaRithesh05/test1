@@ -27,10 +27,8 @@ export default function Navigation() {
           </div>
 
           <div className="hidden md:flex items-center gap-6">
-            <Link href="/analyze">
-              <a className="text-foreground hover:text-primary transition-colors" data-testid="link-analyze">
-                Analyze YML
-              </a>
+            <Link href="/analyze" className="text-foreground hover:text-primary transition-colors" data-testid="link-analyze">
+              Analyze YML
             </Link>
             <button
               onClick={() => scrollToSection("features")}
@@ -62,9 +60,11 @@ export default function Navigation() {
               </Button>
             ) : (
               <Link href="/">
-                <Button data-testid="button-home-nav">
-                  Home
-                </Button>
+                <a>
+                  <Button data-testid="button-home-nav">
+                    Home
+                  </Button>
+                </a>
               </Link>
             )}
           </div>
@@ -81,14 +81,13 @@ export default function Navigation() {
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t">
             <div className="flex flex-col gap-4">
-              <Link href="/analyze">
-                <a
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-foreground hover:text-primary transition-colors text-left"
-                  data-testid="link-analyze-mobile"
-                >
-                  Analyze YML
-                </a>
+              <Link 
+                href="/analyze"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-foreground hover:text-primary transition-colors text-left"
+                data-testid="link-analyze-mobile"
+              >
+                Analyze YML
               </Link>
               <button
                 onClick={() => scrollToSection("features")}
@@ -121,13 +120,14 @@ export default function Navigation() {
                 </Button>
               ) : (
                 <Link href="/">
-                  <Button
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="w-full"
-                    data-testid="button-home-mobile"
-                  >
-                    Home
-                  </Button>
+                  <a onClick={() => setMobileMenuOpen(false)}>
+                    <Button
+                      className="w-full"
+                      data-testid="button-home-mobile"
+                    >
+                      Home
+                    </Button>
+                  </a>
                 </Link>
               )}
             </div>
