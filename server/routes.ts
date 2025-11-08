@@ -482,10 +482,16 @@ ${code}`;
       const allKeys = await db.list("webhook:");
       const events: any[] = [];
       
+      // Extract the keys array from Replit DB response format
+      // Replit DB returns { ok: true, value: [...] } format
+      const keys = (allKeys as any)?.value || allKeys;
+      
       // Get all webhook event values
-      if (Array.isArray(allKeys)) {
-        for (const key of allKeys) {
-          const event = await db.get(key);
+      if (Array.isArray(keys)) {
+        for (const key of keys) {
+          const eventResponse = await db.get(key);
+          // Handle Replit DB response format for get as well
+          const event = (eventResponse as any)?.value || eventResponse;
           if (event) {
             events.push(event);
           }
