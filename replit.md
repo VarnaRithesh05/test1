@@ -56,6 +56,9 @@ Preferred communication style: Simple, everyday language.
 **API Design:**
 - RESTful endpoints with `/api` prefix convention
 - File upload handling via Multer with in-memory storage (buffer-based)
+- Authentication endpoints:
+  - `POST /api/auth/signup`: Creates new user account with email/password, returns JWT token (7-day expiration)
+  - `POST /api/auth/login`: Authenticates user with email/password, returns JWT token
 - AI-powered endpoints:
   - `POST /api/analyze-yml`: Analyzes uploaded YAML files for errors and best practices
   - `POST /api/generate-yml`: Generates YAML files from natural language prompts
@@ -101,18 +104,32 @@ Preferred communication style: Simple, everyday language.
 ### Authentication and Authorization
 
 **Current State:**
-- User schema exists with username/password fields
-- No active authentication middleware implemented
-- Session management infrastructure prepared (connect-pg-simple for PostgreSQL session store)
+- JWT-based authentication system fully implemented
+- User signup and login endpoints operational
+- Password hashing with bcryptjs (10 salt rounds)
+- JWT tokens with 7-day expiration
+- Frontend signup page with form validation
 
-**Planned Architecture:**
-- Session-based authentication using Express sessions
-- Password hashing (bcrypt or similar) before database storage
-- Cookie-based session tokens with HTTP-only flags
+**Frontend Pages:**
+- `/signup` - User registration page with email/password form
+  - React Hook Form with Zod validation
+  - useMutation hook for API integration
+  - Saves JWT to localStorage on success
+  - Redirects to /setup page after signup
 
-**Security Considerations:**
-- Credentials stored with `credentials: "include"` in fetch requests
-- CSRF protection needed for production deployment
+**Backend Implementation:**
+- `POST /api/auth/signup` - Creates user with hashed password, returns JWT
+- `POST /api/auth/login` - Verifies credentials, returns JWT
+- User storage in Replit Database with key pattern: `user:${email}`
+- Generic error messages to prevent user enumeration
+- Input validation for email format and password length
+
+**Security Features:**
+- Bcrypt password hashing before storage
+- JWT_SECRET environment variable for token signing
+- HTTP-only credentials in fetch requests
+- No plain text password storage
+- Rate limiting recommended for production
 
 ### External Dependencies
 
