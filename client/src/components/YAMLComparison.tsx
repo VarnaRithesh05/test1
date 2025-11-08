@@ -14,11 +14,11 @@ export function YAMLComparison({ originalYAML, correctedYAML, showTitle = true }
       return (
         <div
           key={index}
-          className={hasFixComment ? 'bg-green-500/10 border-l-2 border-l-green-500 pl-2' : ''}
+          className={hasFixComment ? 'bg-green-500/20 border-l-4 border-l-green-500 pl-3 py-0.5 my-0.5' : ''}
           data-testid={hasFixComment ? `line-highlighted-${index}` : undefined}
         >
           {line.includes('# FIXED:') || line.includes('# CHANGED:') || line.includes('# ADDED:') ? (
-            <span className="text-green-600 dark:text-green-400 font-semibold">{line}</span>
+            <span className="text-green-700 dark:text-green-300 font-bold">{line}</span>
           ) : (
             <span>{line}</span>
           )}
@@ -31,14 +31,13 @@ export function YAMLComparison({ originalYAML, correctedYAML, showTitle = true }
     <div className="grid md:grid-cols-2 gap-6" data-testid="yaml-comparison">
       <Card>
         <CardHeader>
-          {showTitle && (
+          {showTitle ? (
             <>
-              <CardTitle>Original YAML</CardTitle>
+              <CardTitle>Original YML Code</CardTitle>
               <CardDescription>Your uploaded file</CardDescription>
             </>
-          )}
-          {!showTitle && (
-            <CardTitle className="text-base">Original</CardTitle>
+          ) : (
+            <CardTitle className="text-base font-semibold">Original YML Code</CardTitle>
           )}
         </CardHeader>
         <CardContent>
@@ -50,14 +49,13 @@ export function YAMLComparison({ originalYAML, correctedYAML, showTitle = true }
 
       <Card>
         <CardHeader>
-          {showTitle && (
+          {showTitle ? (
             <>
-              <CardTitle>Corrected YAML</CardTitle>
+              <CardTitle>Corrected YML Code</CardTitle>
               <CardDescription>AI-optimized with highlighted changes</CardDescription>
             </>
-          )}
-          {!showTitle && (
-            <CardTitle className="text-base">Corrected (with fixes highlighted)</CardTitle>
+          ) : (
+            <CardTitle className="text-base font-semibold">Corrected YML Code</CardTitle>
           )}
         </CardHeader>
         <CardContent>

@@ -5,10 +5,18 @@
 AutoPatcher is an AI-powered DevOps productivity tool designed to streamline Docker and GitHub workflows. The application provides intelligent YAML analysis, real-time webhook monitoring, code explanation, and automated YAML generation capabilities. Built as a full-stack web application, it targets technical audiences requiring clarity, efficiency, and professional credibility in their DevOps operations.
 
 The platform leverages Google's Gemini AI to:
-1. **Analyze YAML files** (Docker Compose, GitHub Actions) for errors, misconfigurations, and best practice violations, providing side-by-side comparisons of problematic code and AI-generated corrections with detailed explanations
+1. **Analyze YAML files** (Docker Compose, GitHub Actions) for errors, misconfigurations, and best practice violations, providing **two-column side-by-side comparison** showing "Original YML Code" vs "Corrected YML Code" with **visual highlighting** of all changes using inline comments and green-highlighted corrections
 2. **Generate production-ready YAML files** from natural language descriptions (e.g., "I need a Dockerfile for a Node.js app with Express")
 3. **Explain code snippets** in plain English - Paste any code and receive clear, step-by-step explanations of what it does, breaking down complex logic into understandable concepts
 4. **Analyze Pull Request changes** - When a pull request is opened or updated, fetches the diff and provides a 3-bullet summary plus file-by-file analysis with bug/improvement identification
+
+**Two-Column YAML Comparison Feature:**
+- **Column Headers:** "Original YML Code" (left) and "Corrected YML Code" (right)
+- **Visual Highlighting:** Changes marked with green background (20% opacity), 4px thick green left border, and bold green text
+- **Inline Comments:** AI adds `# FIXED:`, `# CHANGED:`, or `# ADDED:` comments to mark all corrections
+- **Available On:** Analyze YML page (always) and Monitor Webhooks page (for new webhook events)
+- **Component:** Reusable `YAMLComparison` component with responsive grid layout
+- **Note:** Webhook events created before November 8, 2025 don't have original content stored and show an informational message instead
 
 ## User Preferences
 

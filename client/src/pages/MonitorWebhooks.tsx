@@ -137,6 +137,17 @@ export default function MonitorWebhooks() {
                                         />
                                       </div>
                                     )}
+                                    {!fileResult.analysis.is_correct && !fileResult.originalContent && (
+                                      <div className="bg-muted p-3 rounded-md border border-dashed" data-testid={`info-no-original-${event.id}-${index}`}>
+                                        <p className="text-sm text-muted-foreground mb-2">
+                                          <strong>Note:</strong> Two-column comparison not available for this event. 
+                                          The original YAML content was not stored when this webhook was processed.
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                          New webhook events will automatically show side-by-side comparison with highlighted changes.
+                                        </p>
+                                      </div>
+                                    )}
                                     {!fileResult.analysis.is_correct && (
                                       <div className="text-sm" data-testid={`text-explanation-${event.id}-${index}`}>
                                         <p className="font-medium mb-1">Analysis:</p>
