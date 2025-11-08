@@ -237,6 +237,18 @@ User request: ${prompt}`;
         }
       }
       
+      // Save webhook event to storage
+      try {
+        await storage.createWebhookEvent({
+          repository: repository.full_name,
+          eventType: event,
+          filesAnalyzed: results,
+          status: results.every(r => !r.error) ? 'success' : 'partial',
+        });
+      } catch (storageError) {
+        console.error("Error saving webhook event:", storageError);
+      }
+      
       res.status(200).json({
         message: `Analyzed ${results.length} YAML file(s)`,
         repository: repository.full_name,
@@ -244,6 +256,22 @@ User request: ${prompt}`;
       });
     } catch (error: any) {
       console.error("Error processing webhook:", error);
+      
+      // Try to save error event
+      try {
+        const payload = req.body;
+        if (payload?.repository?.full_name) {
+          await storage.createWebhookEvent({
+            repository: payload.repository.full_name,
+            eventType: req.headers['x-github-event'] as string || 'unknown',
+            filesAnalyzed: [],
+            status: 'error',
+          });
+        }
+      } catch (storageError) {
+        console.error("Error saving error webhook event:", storageError);
+      }
+      
       res.status(500).json({ 
         error: "Failed to process webhook" 
       });
