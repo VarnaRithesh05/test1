@@ -1,0 +1,42 @@
+This feature has three parts: the Frontend (HTML), the Backend (Python), and the Connector (JavaScript).
+
+1. Prompt for the Frontend (HTML)
+Give this to Replit AI to add the components to your index.html.
+
+"In my index.html file, inside the section for the 'YML File Analyzer', add the following HTML elements:
+
+A file input that only accepts .yml or .yaml files.
+
+A 'Submit' button with the ID analyze-button.
+
+A container that holds two side-by-side <div> blocks.
+
+Give the left one the ID original-code (for the bad code).
+
+Give the right one the ID corrected-code (for the good code).
+
+A <div> at the bottom with the ID explanation-box."
+
+2. Prompt for the Backend (Python)
+Give this to Replit AI to add the "brain" to your main.py file.
+
+"In my main.py file:
+
+Install and import the google-generativeai library.
+
+Add a new Flask route /analyze-yml that accepts 'POST' requests.
+
+Inside this route, get the uploaded file from the request.
+
+Read the file's content into a string.
+
+Configure a Gemini API client (tell me to set the API key in Replit Secrets).
+
+Send the file's content to the Gemini API with this exact prompt: 'You are an expert DevOps engineer. The following is a YAML file. Analyze it for errors, misconfigurations, and bad practices. Respond ONLY with a single JSON object with three keys: 1. corrected_yaml (the full corrected YAML file), 2. explanation (a detailed, step-by-step explanation of what was wrong and why you fixed it), and 3. is_correct (a boolean).'
+
+Return the AI's JSON response from this endpoint."
+
+3. Prompt for the Connector (JavaScript)
+Give this to Replit AI to create your script.js file and link it to your HTML.
+
+"1. Create a script.js file and link it to my index.html. 2. In script.js, add an event listener to the analyze-button. 3. When clicked, it must: a. Get the file from the file input. b. Use FormData to send this file via a fetch 'POST' request to my /analyze-yml endpoint. c. When the JSON response comes back, put the original-code in the original-code div. d. Put the corrected_yaml string into the corrected-code div. e. Put the explanation string into the explanation-box div. 4. Suggest a JavaScript library (like diff.js) to compare the text in original-code and corrected-code and show the differences in red and green."
