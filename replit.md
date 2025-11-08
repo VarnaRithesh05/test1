@@ -49,6 +49,13 @@ Preferred communication style: Simple, everyday language.
 - AI-powered endpoints:
   - `POST /api/analyze-yml`: Analyzes uploaded YAML files for errors and best practices
   - `POST /api/generate-yml`: Generates YAML files from natural language prompts
+  - `POST /api/github-webhook`: GitHub webhook endpoint for automated YAML checking on push events
+    - Verifies webhook signatures using HMAC-SHA256 with raw request body
+    - Extracts YAML files from commit payloads
+    - Fetches file content from GitHub API
+    - Reuses AI analysis logic for consistency
+    - Requires `GITHUB_WEBHOOK_SECRET` environment variable for signature verification
+    - Optionally uses `GITHUB_TOKEN` for private repository access
 
 **Development vs. Production:**
 - Development: Vite dev server integrated as Express middleware with HMR support
@@ -102,6 +109,16 @@ Preferred communication style: Simple, everyday language.
   - Usage: YAML analysis with structured JSON response parsing
   - API key configuration via environment variables (`GEMINI_API_KEY`)
   - Error handling: Regex-based JSON extraction from potentially verbose AI responses, plus specific error messages for quota and authentication issues
+  - Reusable analysis function `analyzeYAMLContent` for consistency across endpoints
+
+**GitHub Integration:**
+- **Webhook Support** for automated YAML checking on push events
+  - Secure signature verification using HMAC-SHA256
+  - Raw body parsing to match GitHub's signing algorithm
+  - Extracts YAML files (.yml, .yaml) from commit changes
+  - Fetches file content via GitHub Contents API
+  - Optional authentication with `GITHUB_TOKEN` for private repositories
+  - Returns comprehensive analysis results for each modified YAML file
 
 **Database Service:**
 - **Neon Serverless PostgreSQL**
