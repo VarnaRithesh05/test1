@@ -406,13 +406,14 @@ User request: ${prompt}`;
       
       // Try to save error event to Replit Database
       try {
-        if (payload?.repository?.full_name) {
+        const errorPayload = req.body;
+        if (errorPayload?.repository?.full_name) {
           const webhookEvent = {
             id: crypto.randomUUID(),
             timestamp: new Date().toISOString(),
             status: 'error',
             eventType: req.headers['x-github-event'] as string || 'unknown',
-            repository: payload.repository.full_name,
+            repository: errorPayload.repository.full_name,
             filesAnalyzed: []
           };
           
