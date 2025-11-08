@@ -4,7 +4,9 @@
 
 AutoPatcher is an AI-powered DevOps productivity tool designed to streamline Docker and GitHub workflows. The application provides intelligent YAML analysis, real-time webhook monitoring, code explanation, and automated YAML generation capabilities. Built as a full-stack web application, it targets technical audiences requiring clarity, efficiency, and professional credibility in their DevOps operations.
 
-The platform leverages Google's Gemini AI to analyze YAML files (Docker Compose, GitHub Actions) for errors, misconfigurations, and best practice violations, providing side-by-side comparisons of problematic code and AI-generated corrections with detailed explanations.
+The platform leverages Google's Gemini AI to:
+1. **Analyze YAML files** (Docker Compose, GitHub Actions) for errors, misconfigurations, and best practice violations, providing side-by-side comparisons of problematic code and AI-generated corrections with detailed explanations
+2. **Generate production-ready YAML files** from natural language descriptions (e.g., "I need a Dockerfile for a Node.js app with Express")
 
 ## User Preferences
 
@@ -44,7 +46,9 @@ Preferred communication style: Simple, everyday language.
 **API Design:**
 - RESTful endpoints with `/api` prefix convention
 - File upload handling via Multer with in-memory storage (buffer-based)
-- Single AI analysis endpoint: `POST /api/analyze-yml`
+- AI-powered endpoints:
+  - `POST /api/analyze-yml`: Analyzes uploaded YAML files for errors and best practices
+  - `POST /api/generate-yml`: Generates YAML files from natural language prompts
 
 **Development vs. Production:**
 - Development: Vite dev server integrated as Express middleware with HMR support
