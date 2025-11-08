@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
+import { Link, useLocation } from "wouter";
 
 export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [location] = useLocation();
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -25,13 +27,11 @@ export default function Navigation() {
           </div>
 
           <div className="hidden md:flex items-center gap-6">
-            <button
-              onClick={() => scrollToSection("features")}
-              className="text-foreground hover:text-primary transition-colors"
-              data-testid="link-analyze"
-            >
-              Analyze YML
-            </button>
+            <Link href="/analyze">
+              <a className="text-foreground hover:text-primary transition-colors" data-testid="link-analyze">
+                Analyze YML
+              </a>
+            </Link>
             <button
               onClick={() => scrollToSection("features")}
               className="text-foreground hover:text-primary transition-colors"
@@ -53,12 +53,20 @@ export default function Navigation() {
             >
               Generate YML
             </button>
-            <Button
-              onClick={() => scrollToSection("contact")}
-              data-testid="button-get-started-nav"
-            >
-              Get Started
-            </Button>
+            {location === "/" ? (
+              <Button
+                onClick={() => scrollToSection("contact")}
+                data-testid="button-get-started-nav"
+              >
+                Get Started
+              </Button>
+            ) : (
+              <Link href="/">
+                <Button data-testid="button-home-nav">
+                  Home
+                </Button>
+              </Link>
+            )}
           </div>
 
           <button
@@ -73,13 +81,15 @@ export default function Navigation() {
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t">
             <div className="flex flex-col gap-4">
-              <button
-                onClick={() => scrollToSection("features")}
-                className="text-foreground hover:text-primary transition-colors text-left"
-                data-testid="link-analyze-mobile"
-              >
-                Analyze YML
-              </button>
+              <Link href="/analyze">
+                <a
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-foreground hover:text-primary transition-colors text-left"
+                  data-testid="link-analyze-mobile"
+                >
+                  Analyze YML
+                </a>
+              </Link>
               <button
                 onClick={() => scrollToSection("features")}
                 className="text-foreground hover:text-primary transition-colors text-left"
@@ -101,13 +111,25 @@ export default function Navigation() {
               >
                 Generate YML
               </button>
-              <Button
-                onClick={() => scrollToSection("contact")}
-                className="w-full"
-                data-testid="button-get-started-mobile"
-              >
-                Get Started
-              </Button>
+              {location === "/" ? (
+                <Button
+                  onClick={() => scrollToSection("contact")}
+                  className="w-full"
+                  data-testid="button-get-started-mobile"
+                >
+                  Get Started
+                </Button>
+              ) : (
+                <Link href="/">
+                  <Button
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full"
+                    data-testid="button-home-mobile"
+                  >
+                    Home
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         )}
