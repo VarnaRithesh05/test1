@@ -94,10 +94,10 @@ Preferred communication style: Simple, everyday language.
 
 **AI Service Integration:**
 - **Google Gemini API** (`@google/generative-ai` v0.24.1)
-  - Model: `gemini-1.5-flash` for fast inference
+  - Model: `gemini-2.5-flash` for fast inference (updated from deprecated 1.5 models as of 2025)
   - Usage: YAML analysis with structured JSON response parsing
   - API key configuration via environment variables (`GEMINI_API_KEY`)
-  - Error handling: Regex-based JSON extraction from potentially verbose AI responses
+  - Error handling: Regex-based JSON extraction from potentially verbose AI responses, plus specific error messages for quota and authentication issues
 
 **Database Service:**
 - **Neon Serverless PostgreSQL**

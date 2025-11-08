@@ -22,7 +22,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const fileContent = req.file.buffer.toString('utf-8');
       
       const model = genAI.getGenerativeModel({ 
-        model: "gemini-1.5-flash-latest"
+        model: "gemini-2.5-flash"
       });
       
       const prompt = `You are an expert DevOps engineer. The following is a YAML file. Analyze it for errors, misconfigurations, and bad practices. Respond ONLY with a single JSON object with three keys: 1. corrected_yaml (the full corrected YAML file), 2. explanation (a detailed, step-by-step explanation of what was wrong and why you fixed it), and 3. is_correct (a boolean - true if the original YAML was already correct, false if issues were found).
