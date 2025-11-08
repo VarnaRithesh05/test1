@@ -7,7 +7,8 @@ AutoPatcher is an AI-powered DevOps productivity tool designed to streamline Doc
 The platform leverages Google's Gemini AI to:
 1. **Analyze YAML files** (Docker Compose, GitHub Actions) for errors, misconfigurations, and best practice violations, providing side-by-side comparisons of problematic code and AI-generated corrections with detailed explanations
 2. **Generate production-ready YAML files** from natural language descriptions (e.g., "I need a Dockerfile for a Node.js app with Express")
-3. **Analyze Pull Request changes** - When a pull request is opened or updated, fetches the diff and provides a 3-bullet summary plus file-by-file analysis with bug/improvement identification
+3. **Explain code snippets** in plain English - Paste any code and receive clear, step-by-step explanations of what it does, breaking down complex logic into understandable concepts
+4. **Analyze Pull Request changes** - When a pull request is opened or updated, fetches the diff and provides a 3-bullet summary plus file-by-file analysis with bug/improvement identification
 
 ## User Preferences
 
@@ -50,6 +51,7 @@ Preferred communication style: Simple, everyday language.
 - AI-powered endpoints:
   - `POST /api/analyze-yml`: Analyzes uploaded YAML files for errors and best practices
   - `POST /api/generate-yml`: Generates YAML files from natural language prompts
+  - `POST /api/explain-code`: Provides plain English explanations of code snippets with step-by-step breakdowns
   - `POST /api/github-webhook`: GitHub webhook endpoint for automated analysis on both push and pull_request events
     - Verifies webhook signatures using HMAC-SHA256 with raw request body
     - **Push events**: Extracts YAML files from commit payloads, fetches file content from GitHub API, analyzes for errors
@@ -109,10 +111,11 @@ Preferred communication style: Simple, everyday language.
 **AI Service Integration:**
 - **Google Gemini API** (`@google/generative-ai` v0.24.1)
   - Model: `gemini-2.5-flash` for fast inference (updated from deprecated 1.5 models as of 2025)
-  - Usage: YAML analysis with structured JSON response parsing
+  - Usage: YAML analysis, code explanation, and pull request reviews
   - API key configuration via environment variables (`GEMINI_API_KEY`)
   - Error handling: Regex-based JSON extraction from potentially verbose AI responses, plus specific error messages for quota and authentication issues
   - Reusable analysis function `analyzeYAMLContent` for consistency across endpoints
+  - Code explanation endpoint provides plain English explanations with step-by-step logic breakdown
 
 **GitHub Integration:**
 - **Webhook Support** for automated analysis on push and pull request events
