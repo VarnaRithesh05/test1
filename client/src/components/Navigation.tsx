@@ -30,13 +30,9 @@ export default function Navigation() {
             <Link href="/analyze" className="text-foreground hover:text-primary transition-colors" data-testid="link-analyze">
               Analyze YML
             </Link>
-            <button
-              onClick={() => scrollToSection("features")}
-              className="text-foreground hover:text-primary transition-colors"
-              data-testid="link-monitor"
-            >
+            <Link href="/monitor" className="text-foreground hover:text-primary transition-colors" data-testid="link-monitor">
               Monitor Webhooks
-            </button>
+            </Link>
             <button
               onClick={() => scrollToSection("features")}
               className="text-foreground hover:text-primary transition-colors"
@@ -55,13 +51,11 @@ export default function Navigation() {
                 Get Started
               </Button>
             ) : (
-              <Link href="/">
-                <a>
-                  <Button data-testid="button-home-nav">
-                    Home
-                  </Button>
-                </a>
-              </Link>
+              <Button asChild data-testid="button-home-nav">
+                <Link href="/">
+                  Home
+                </Link>
+              </Button>
             )}
           </div>
 
@@ -85,13 +79,14 @@ export default function Navigation() {
               >
                 Analyze YML
               </Link>
-              <button
-                onClick={() => scrollToSection("features")}
+              <Link
+                href="/monitor"
+                onClick={() => setMobileMenuOpen(false)}
                 className="text-foreground hover:text-primary transition-colors text-left"
                 data-testid="link-monitor-mobile"
               >
                 Monitor Webhooks
-              </button>
+              </Link>
               <button
                 onClick={() => scrollToSection("features")}
                 className="text-foreground hover:text-primary transition-colors text-left"
@@ -116,16 +111,11 @@ export default function Navigation() {
                   Get Started
                 </Button>
               ) : (
-                <Link href="/">
-                  <a onClick={() => setMobileMenuOpen(false)}>
-                    <Button
-                      className="w-full"
-                      data-testid="button-home-mobile"
-                    >
-                      Home
-                    </Button>
-                  </a>
-                </Link>
+                <Button asChild className="w-full" data-testid="button-home-mobile">
+                  <Link href="/" onClick={() => setMobileMenuOpen(false)}>
+                    Home
+                  </Link>
+                </Button>
               )}
             </div>
           </div>

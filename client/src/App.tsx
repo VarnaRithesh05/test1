@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/Home";
 import AnalyzeYML from "@/pages/AnalyzeYML";
 import GenerateYML from "@/pages/GenerateYML";
+import MonitorWebhooks from "@/pages/MonitorWebhooks";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -14,6 +15,7 @@ function Router() {
       <Route path="/" component={Home}/>
       <Route path="/analyze" component={AnalyzeYML}/>
       <Route path="/generate" component={GenerateYML}/>
+      <Route path="/monitor" component={MonitorWebhooks}/>
       <Route component={NotFound} />
     </Switch>
   );
