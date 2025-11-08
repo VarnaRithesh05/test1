@@ -66,6 +66,50 @@ ${fileContent}`;
     }
   });
 
+  app.post("/api/generate-yml", async (req, res) => {
+    try {
+      const { prompt } = req.body;
+      
+      if (!prompt || typeof prompt !== 'string') {
+        return res.status(400).json({ error: "No prompt provided" });
+      }
+
+      const model = genAI.getGenerativeModel({ 
+        model: "gemini-2.5-flash"
+      });
+      
+      const aiPrompt = `You are a DevOps expert. The user will provide a plain-text request. Generate a complete, secure, and production-ready Dockerfile or docker-compose.yml or GitHub Actions YAML file that meets their request. Only output the code, with no other text before or after it.
+
+User request: ${prompt}`;
+
+      const result = await model.generateContent(aiPrompt);
+      const response = result.response;
+      const generatedYaml = response.text();
+      
+      console.log("Gemini generated YAML:", generatedYaml);
+      
+      res.json({ generated_yaml: generatedYaml });
+    } catch (error: any) {
+      console.error("Error generating YAML:", error);
+      
+      if (error?.status === 429 || error?.message?.includes("quota")) {
+        return res.status(429).json({ 
+          error: "API quota exceeded. Please check your Gemini API key has sufficient credits." 
+        });
+      }
+      
+      if (error?.status === 401 || error?.message?.includes("API key")) {
+        return res.status(401).json({ 
+          error: "Invalid API key. Please check your GEMINI_API_KEY configuration." 
+        });
+      }
+      
+      res.status(500).json({ 
+        error: "Failed to generate YAML file. Please try again." 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

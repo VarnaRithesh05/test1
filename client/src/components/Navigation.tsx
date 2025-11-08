@@ -44,13 +44,9 @@ export default function Navigation() {
             >
               Explain Code
             </button>
-            <button
-              onClick={() => scrollToSection("features")}
-              className="text-foreground hover:text-primary transition-colors"
-              data-testid="link-generate"
-            >
+            <Link href="/generate" className="text-foreground hover:text-primary transition-colors" data-testid="link-generate">
               Generate YML
-            </button>
+            </Link>
             {location === "/" ? (
               <Button
                 onClick={() => scrollToSection("contact")}
@@ -103,13 +99,14 @@ export default function Navigation() {
               >
                 Explain Code
               </button>
-              <button
-                onClick={() => scrollToSection("features")}
+              <Link
+                href="/generate"
+                onClick={() => setMobileMenuOpen(false)}
                 className="text-foreground hover:text-primary transition-colors text-left"
                 data-testid="link-generate-mobile"
               >
                 Generate YML
-              </button>
+              </Link>
               {location === "/" ? (
                 <Button
                   onClick={() => scrollToSection("contact")}
