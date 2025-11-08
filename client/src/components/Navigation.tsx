@@ -33,13 +33,9 @@ export default function Navigation() {
             <Link href="/monitor" className="text-foreground hover:text-primary transition-colors" data-testid="link-monitor">
               Monitor Webhooks
             </Link>
-            <button
-              onClick={() => scrollToSection("features")}
-              className="text-foreground hover:text-primary transition-colors"
-              data-testid="link-explain"
-            >
+            <Link href="/explain" className="text-foreground hover:text-primary transition-colors" data-testid="link-explain">
               Explain Code
-            </button>
+            </Link>
             <Link href="/generate" className="text-foreground hover:text-primary transition-colors" data-testid="link-generate">
               Generate YML
             </Link>
@@ -87,13 +83,14 @@ export default function Navigation() {
               >
                 Monitor Webhooks
               </Link>
-              <button
-                onClick={() => scrollToSection("features")}
+              <Link
+                href="/explain"
+                onClick={() => setMobileMenuOpen(false)}
                 className="text-foreground hover:text-primary transition-colors text-left"
                 data-testid="link-explain-mobile"
               >
                 Explain Code
-              </button>
+              </Link>
               <Link
                 href="/generate"
                 onClick={() => setMobileMenuOpen(false)}

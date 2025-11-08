@@ -135,6 +135,51 @@ User request: ${prompt}`;
     }
   });
 
+  app.post("/api/explain-code", async (req, res) => {
+    try {
+      const { code } = req.body;
+      
+      if (!code || typeof code !== 'string') {
+        return res.status(400).json({ error: "No code provided" });
+      }
+
+      const model = genAI.getGenerativeModel({ 
+        model: "gemini-2.5-flash"
+      });
+      
+      const aiPrompt = `You are a senior software engineer and technical educator. The user will provide a code snippet. Explain what this code does in clear, plain English. Break down the logic step-by-step, explain any complex concepts, and describe the overall purpose. Be thorough but easy to understand.
+
+Code to explain:
+${code}`;
+
+      const result = await model.generateContent(aiPrompt);
+      const response = result.response;
+      const explanation = response.text();
+      
+      console.log("Gemini code explanation generated");
+      
+      res.json({ explanation: explanation });
+    } catch (error: any) {
+      console.error("Error explaining code:", error);
+      
+      if (error?.status === 429 || error?.message?.includes("quota")) {
+        return res.status(429).json({ 
+          error: "API quota exceeded. Please check your Gemini API key has sufficient credits." 
+        });
+      }
+      
+      if (error?.status === 401 || error?.message?.includes("API key")) {
+        return res.status(401).json({ 
+          error: "Invalid API key. Please check your GEMINI_API_KEY configuration." 
+        });
+      }
+      
+      res.status(500).json({ 
+        error: "Failed to explain code. Please try again." 
+      });
+    }
+  });
+
   app.post("/api/github-webhook", async (req, res) => {
     try {
       const signature = req.headers['x-hub-signature-256'] as string;
